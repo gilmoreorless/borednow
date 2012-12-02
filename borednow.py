@@ -10,6 +10,7 @@ path_tasks = dirname + '/tasks.json'
 path_state = dirname + '/state.json'
 tasks_cache = []
 state_cache = {}
+max_skips = 5
 
 
 def show_help(msg='', code=1):
@@ -122,19 +123,40 @@ if args.add:
     exit(0)
 
 current = get_current_task()
+was_skipped = False
 if current:
     if args.done:
         current['done'] = True
         update_task(current)
         set_current_task(None)
+        state = get_state()
+        state['skips'] = 0
+        save_state(state)
         print_task('TASK MARKED AS DONE', current)
+    elif args.skip:
+        state = get_state()
+        skips = state.get('skips', 0)
+        if skips == max_skips:
+            print '!!! No more skips allowed - you have to do this one !!!'
+            print_task('DO IT', current)
+            exit(1)
+        was_skipped = True
+        state['skips'] = skips + 1
+        save_state(state)
+        print_task('TASK SKIPPED', current)
     else:
         print_task('CURRENT TASK', current)
-    exit(0)
+    if not was_skipped:
+        exit(0)
 
-if args.done:
-    print '!!! No current task to mark as done !!!'
-    exit(1)
+if not was_skipped:
+    if args.done:
+        print '!!! No current task to mark as done !!!'
+        exit(1)
+
+    if args.skip:
+        print '!!! No current task to skip !!!'
+        exit(1)
 
 tasks = filter(filter_active, get_tasks())
 if len(tasks) == 0:
