@@ -86,12 +86,22 @@ def write_tasks(tasks):
     f.close()
 
 
-def add_task(task_str):
+def add_task(task_str, write_file=True):
     tasks = get_tasks()
     id = len(tasks)
     task = {'id': id, 'text': task_str, 'done': False}
     tasks.append(task)
-    write_tasks(tasks)
+    if write_file:
+        write_tasks(tasks)
+    return task
+
+
+def add_tasks_from_file(f):
+    print 'Importing...\n'
+    for line in f:
+        task = add_task(line.strip(), write_file=False)
+        print_task('  ', task)
+    write_tasks(get_tasks())
 
 
 def update_task(task):
@@ -114,12 +124,17 @@ def filter_active(x):
 
 parser = argparse.ArgumentParser(description='Bored Now!')
 parser.add_argument('-a', '--add')
+parser.add_argument('-i', '--import', type=file, dest='file')
 parser.add_argument('-d', '--done', action='store_true')
 parser.add_argument('-s', '--skip', action='store_true')
 args = parser.parse_args()
 
 if args.add:
     add_task(args.add)
+    exit(0)
+
+if args.file:
+    add_tasks_from_file(args.file)
     exit(0)
 
 current = get_current_task()
