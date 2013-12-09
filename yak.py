@@ -72,6 +72,7 @@ def print_yak_stack(stack):
 
 def print_yaks(stack):
     print_yak_frame_count(stack)
+    print
     print_yak_stack(stack)
 
 
