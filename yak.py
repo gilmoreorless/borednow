@@ -63,8 +63,9 @@ def switch_profile(stack, profile):
 
 
 def pop_yak_frame(stack):
-    if (len(stack)):
-        stack.pop()
+    substack = stack['profiles'][stack['cur_profile']]
+    if (len(substack)):
+        substack.pop()
         save_yak_stack(stack)
 
 
